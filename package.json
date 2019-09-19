@@ -1,0 +1,36 @@
+{
+  "name": "@gradecam/gridfs",
+  "version": "1.0.0",
+  "description": "Make working with GridFS and mongoose easier.",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "build": "tsc -p .",
+    "build:clean": "npm run clean && npm run build",
+    "clean": "rimraf tsconfig.tsbuildinfo lib",
+    "lint": "eslint src/*.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "gridfs",
+    "mongoose"
+  ],
+  "author": "Jarom Loveridge <jaroml@gradecam.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@types/mongodb": "^3.3.1",
+    "@types/mongoose": "^5.5.17",
+    "@types/node": "^10.14.18"
+  },
+  "peerDependencies": {
+    "mongoose": ">=5.7.1",
+    "tslib": ">=1.10.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^2.3.0",
+    "@typescript-eslint/parser": "^2.3.0",
+    "eslint": "^6.4.0",
+    "mongoose": "^5.7.1",
+    "typescript": "^3.6.3"
+  }
+}
