@@ -32,5 +32,8 @@
     "eslint": "^6.4.0",
     "mongoose": "^5.7.1",
     "typescript": "^3.6.3"
+  },
+  "engines": {
+    "node": ">=10"
   }
 }
