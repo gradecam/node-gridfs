@@ -1,7 +1,7 @@
 import mongodb from 'mongodb';
 import mongoose from 'mongoose';
 
-import { BucketFileDoc, BucketFileModel, createFileSchema, DEFAULT_BUCKET_NAME } from '../';
+import { BucketFileDoc, BucketFileModel, createFileSchema } from '../';
 import g from './global';
 import fixtures from './fixtures';
 
