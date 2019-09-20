@@ -45,5 +45,13 @@
   "publishConfig": {
     "registry": "https://registry.npmjs.org",
     "access": "public"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gradecam/node-gridfs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/gradecam/node-gridfs/issues"
+  },
+  "homepage": "https://github.com/gradecam/node-gridfs#readme"
 }
