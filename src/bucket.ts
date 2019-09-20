@@ -1,5 +1,5 @@
 import mongodb from 'mongodb';
-import { Document, Collection, Model } from 'mongoose';
+import { Collection } from 'mongoose';
 
 import { raiseInvalidCollection } from './error';
 import { FileUploadCallback, MulterGridFSFile, Request } from './request';
@@ -305,68 +305,4 @@ export interface WriteFileOpts extends mongodb.GridFSBucketOpenUploadStreamOptio
    * `_id` of the file in `GridFS`
    */
   _id?: mongodb.ObjectId;
-}
-
-/**
- * Defines the shape of a `BucketFileDoc`
- */
-export interface BucketFileDoc extends Document, BucketFile {
-  _id: any;
-  updatedAt: Date;
-  /**
-   * Creates a `mongodb.GridFSBucketReadStream` to read the specific file chunks
-   * associated with the file.
-   * @param opts
-   */
-  createReadStream(opts?: ReadFileBaseOpts): mongodb.GridFSBucketReadStream;
-  /**
-   * Creates a `mongodb.GridFSBucketWriteStream` for writing a new revision of
-   * `filename` to `GridFS`. The stream's `id` property contains the file's `_id`
-   * within `GridFS`.
-   */
-  createWriteStream(): mongodb.GridFSBucketWriteStream;
-  /**
-   * Removes file and chunks from `GridFS`
-   */
-  deleteById(): Promise<mongodb.ObjectId>;
-  /**
-   * Read chunks from `GridFS` into a `Buffer`
-   */
-  read(): Promise<Buffer>;
-  /**
-   * Removes file and chunks from `GridFS`
-   */
-  unlink(): Promise<mongodb.ObjectId>;
-  write(readableStream: NodeJS.ReadableStream): Promise<BucketFile>;
-}
-
-/**
- * Defines the shape of a `BucketFileModel`
- */
-export interface BucketFileModel extends Model<BucketFileDoc> {
-  /**
-   * Creates a `mongodb.GridFSBucketReadStream` to read a specific file's
-   * chunks from `GridFS`.
-   * @param opts
-   */
-  createReadStream(opts: ReadFileOpts): mongodb.GridFSBucketReadStream;
-  /**
-   * Creates a `mongodb.GridFSBucketWriteStream` for writing a file.
-   * The stream's `id` property contains the file's `_id` within `GridFS`.
-   * @param opts
-   */
-  createWriteStream(opts: WriteFileOpts): mongodb.GridFSBucketWriteStream;
-  /**
-   * Deletes a file and it's chunks
-   * @param _id
-   */
-  deleteById(_id: mongodb.ObjectId): Promise<mongodb.ObjectId>;
-  /**
-   * Deletes files matching `filename` and their chunks
-   * @param filename
-   * @param opts
-   */
-  deleteByFilename(filename: string, opts: mongodb.GridFSBucketFindOptions): Promise<mongodb.ObjectId[]>;
-  read(opts: ReadFileOpts): Promise<Buffer>;
-  write(file: BucketFile, readStream: NodeJS.ReadableStream): Promise<BucketFile>;
 }
