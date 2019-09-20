@@ -4,7 +4,7 @@ import { Document, Collection, Model } from 'mongoose';
 import { raiseInvalidCollection } from './error';
 import { FileUploadCallback, MulterGridFSFile, Request } from './request';
 
-const DEFAULT_BUCKET_NAME = 'fs';
+export const DEFAULT_BUCKET_NAME = 'fs';
 
 /**
  * An enhanced version of the `mongodb.GridFSBucket` which makes
@@ -106,7 +106,7 @@ export class GridFSBucket extends mongodb.GridFSBucket {
   }
 
   /**
-   * Creates a `mongodb.GridFSBucketReadStream`) for streaming the file with the
+   * Creates a `mongodb.GridFSBucketReadStream` for streaming the file with the
    * given `_id` or `filename` from GridFS. If there are multiple files with the
    * same name, this will stream the most recent file with the given name (as
    * determined by the `uploadDate` field). You can set the `revision` option
@@ -218,12 +218,11 @@ export class GridFSBucket extends mongodb.GridFSBucket {
    */
   readFile(opts: ReadFileOpts): Promise<Buffer> {
     return new Promise<Buffer>((resolve, reject): void => {
-      try {
-        const stream = this.createReadStream(opts);
-        setTimeout((): void => resolve(stream.read()), 0);
-      } catch (err) {
-        reject(err);
-      }
+      const stream = this.createReadStream(opts);
+      const buffs: Buffer[] = [];
+      stream.on('error', reject);
+      stream.on('end', () => resolve(Buffer.concat(buffs)));
+      stream.on('data', (chunk: Buffer) => buffs.push(chunk));
     });
   }
 }
