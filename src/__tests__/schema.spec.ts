@@ -36,15 +36,17 @@ describe('BucketFileModel', () => {
   });
 
   describe('mongoose connected', () => {
+    let conn: mongoose.Connection;
     const bucketName = 'mongoose';
-    const FileModel = mongoose.model<BucketFileDoc>('MongooseFile', createFileSchema(bucketName)) as BucketFileModel;
+    let FileModel: BucketFileModel;
 
     beforeAll(async () => {
-      await mongoose.connect(g.__MONGO_URI__, {useNewUrlParser: true, useUnifiedTopology: true} as any);
+      conn = await mongoose.createConnection(g.__MONGO_URI__, {useNewUrlParser: true, useUnifiedTopology: true} as any);
+      FileModel = conn.model<BucketFileDoc>('MongooseFile', createFileSchema(bucketName)) as BucketFileModel;
     });
 
     afterAll(async () => {
-      await mongoose.disconnect();
+      await conn.close();
     });
 
     it('should use use correct bucket', () => {
@@ -81,5 +83,13 @@ describe('BucketFileModel', () => {
       const buff = await doc.read();
       expect(buff.toString()).toEqual(fixtures.sample.contents());
     });
+
+    it('should be able to write a buffer', async () => {
+      const data = Buffer.from(fixtures.sample.contents());
+      const doc = new FileModel({filename: fixtures.sample.filename, contentType: 'text/plain'});
+      await doc.write(data);
+      const readBuff = await doc.read();
+      expect(readBuff.toString()).toEqual(data.toString());
+    })
   });
 });
