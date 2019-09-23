@@ -5,6 +5,7 @@ import {
   DEFAULT_BUCKET_NAME, GridFSBucket,
   ReadFileBaseOpts, ReadFileOpts,
   WriteFileOpts,
+  writeData,
 } from './bucket';
 
 /**
@@ -45,9 +46,9 @@ export interface BucketFileDoc extends mongoose.Document, BucketFile {
   unlink(): Promise<mongodb.ObjectId>;
   /**
    * Writes contents of stream to `GridFS`
-   * @param readableStream
+   * @param data
    */
-  write(readableStream: NodeJS.ReadableStream): Promise<BucketFileDoc>;
+  write(data: Buffer | NodeJS.ReadableStream): Promise<BucketFileDoc>;
 }
 
 /**
@@ -91,9 +92,9 @@ export interface BucketFileModel extends mongoose.Model<BucketFileDoc> {
   /**
    * Writes the cont
    * @param file
-   * @param readStream
+   * @param data
    */
-  write(file: Partial<BucketFile>, readStream: NodeJS.ReadableStream): Promise<BucketFileDoc>;
+  write(file: Partial<BucketFile>, data: Buffer | NodeJS.ReadableStream): Promise<BucketFileDoc>;
 }
 
 /**
@@ -148,22 +149,17 @@ export function createFileSchema(bucketName?: string): mongoose.Schema<BucketFil
     return this.getBucket().readFile({_id: this._id});
   };
 
-  schema.methods.write = function(this: BucketFileDoc, readStream: NodeJS.ReadableStream): Promise<BucketFileDoc> {
+  schema.methods.write = function(this: BucketFileDoc, data: Buffer | NodeJS.ReadableStream): Promise<BucketFileDoc> {
     const writeStream = this.createWriteStream();
-    return new Promise<BucketFileDoc>((resolve, reject): void => {
-      writeStream.on('error', reject);
-      writeStream.on('finish', (file: BucketFile): void => {
+    return writeData(writeStream, data)
+      .then((file) => {
         this.length = file.length;
         this.chunkSize = file.chunkSize;
         this.uploadDate = file.uploadDate;
         this.isNew = false;
-        this.save()
-          .then((d) => resolve(d))
-          .catch(reject)
-        ;
-      });
-      readStream.pipe(writeStream);
-    });
+        return this.save();
+      })
+    ;
   };
 
   schema.statics.createReadStream = function(this: BucketFileModel, opts: ReadFileOpts): mongodb.GridFSBucketReadStream {
@@ -186,9 +182,9 @@ export function createFileSchema(bucketName?: string): mongoose.Schema<BucketFil
     return this.getBucket().readFile(opts);
   };
 
-  schema.statics.write = function(this: BucketFileModel, file: Partial<BucketFile>, readStream: NodeJS.ReadableStream): Promise<BucketFileDoc> {
+  schema.statics.write = function(this: BucketFileModel, file: Partial<BucketFile>, data: Buffer | NodeJS.ReadableStream): Promise<BucketFileDoc> {
     const bucketFile = new this(file);
-    return bucketFile.write(readStream);
+    return bucketFile.write(data);
   };
 
   return schema;

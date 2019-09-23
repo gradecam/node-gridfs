@@ -6,6 +6,20 @@ import { FileUploadCallback, MulterGridFSFile, Request } from './request';
 
 export const DEFAULT_BUCKET_NAME = 'fs';
 
+export function writeData(writeStream: mongodb.GridFSBucketWriteStream, data: Buffer | NodeJS.ReadableStream): Promise<BucketFile> {
+  return new Promise<BucketFile>((resolve, reject): void => {
+    writeStream.on('error', reject);
+    writeStream.on('finish', (file: BucketFile) => {
+      setTimeout(() => resolve(file), 0);
+    });
+    if (data instanceof Buffer) {
+      writeStream.end(data);
+    } else {
+      data.pipe(writeStream);
+    }
+  });
+}
+
 /**
  * An enhanced version of the `mongodb.GridFSBucket` which makes
  * interacting with the bucket a little easier.
@@ -185,13 +199,13 @@ export class GridFSBucket extends mongodb.GridFSBucket {
 
   /**
    * Find a single file.
-   * @param query
+   * @param filter
    * @param opts
    */
-  async findOne(query: any, opts: mongodb.GridFSBucketFindOptions = {}): Promise<BucketFile | null> {
+  async findOne(filter: object, opts: mongodb.GridFSBucketFindOptions = {}): Promise<BucketFile | null> {
     opts.limit = 1;
-    const cursor: mongodb.Cursor<BucketFile | null> = this.find(query, opts);
-    if (!cursor) { raiseInvalidCollection(this.collectionName) }
+    const cursor: mongodb.Cursor<BucketFile | null> = this.find(filter, opts);
+    if (!cursor) { raiseInvalidCollection(this.collectionName); }
     return cursor.next();
   }
 
@@ -203,13 +217,8 @@ export class GridFSBucket extends mongodb.GridFSBucket {
    * @param opts
    * @param readStream
    */
-  writeFile(opts: WriteFileOpts, readStream: NodeJS.ReadableStream): Promise<BucketFile> {
-    const writeStream = this.createWriteStream(opts);
-    return new Promise<BucketFile>((resolve, reject): void => {
-      writeStream.on('error', reject);
-      writeStream.on('finish', (file: BucketFile) => setTimeout(() => resolve(file), 0));
-      readStream.pipe(writeStream);
-    });
+  writeFile(opts: WriteFileOpts, data: Buffer | NodeJS.ReadableStream): Promise<BucketFile> {
+    return writeData(this.createWriteStream(opts), data);
   }
 
   /**
