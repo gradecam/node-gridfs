@@ -1,6 +1,6 @@
 {
   "name": "@gradecam/gridfs",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Make working with GridFS and mongoose easier.",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
