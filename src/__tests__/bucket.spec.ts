@@ -81,12 +81,32 @@ describe('GridFSBucket', () => {
       expect(file._id).toBeTruthy();
     });
 
+    it('should be able to write a buffer', async () => {
+      const data = Buffer.from(fixtures.sample.contents());
+      const file = await defaultBucket.writeFile({filename: fixtures.sample.filename}, data);
+      expect(file).toBeTruthy();
+      expect(file._id).toBeTruthy();
+    });
+
     it('should be able to read a file', async () => {
       await writeSampleFile();
       const buff = await defaultBucket.readFile({filename: fixtures.sample.filename});
       expect(buff).toBeTruthy();
       expect(buff.length).toBeGreaterThan(0);
       expect(buff.toString()).toEqual(fixtures.sample.contents());
+    });
+
+    it('should be able to get a read stream', async () => {
+      await writeSampleFile();
+      const stream = defaultBucket.createReadStream({filename: fixtures.sample.filename});
+      expect(typeof stream.on).toEqual('function');
+      expect(typeof stream.read).toEqual('function');
+    });
+
+    it('should be able to create a write stream', async () => {
+      const stream = defaultBucket.createWriteStream({filename: fixtures.sample.filename});
+      expect(typeof stream.on).toEqual('function');
+      expect(typeof stream.write).toEqual('function');
     });
 
     it('should be able to use findOne method to find a file', async () => {
