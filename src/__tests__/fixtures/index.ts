@@ -23,9 +23,3 @@ export interface Fixture {
 }
 
 export default fixtures;
-
-describe('fixtures', () => {
-  it('should have sample', () => {
-    expect(fixtures.sample).toBeTruthy();
-  });
-});
